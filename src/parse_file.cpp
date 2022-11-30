@@ -2,6 +2,7 @@
 #include <fstream>
 #include <ctype.h>
 #include "lexical/token.cpp"
+#include "lexical/reserved_words.cpp"
 
 #define MAX_LEXEME_LEN 1024
 
@@ -25,8 +26,8 @@ Token nextToken(Lexeme::UNKNOWN, 0, 0); // placeholder
 char nextChar;
 Lexeme charClass = Lexeme::UNKNOWN; // placeholder
 
-int line = 0;
-int column = 0;
+int line = 1;
+int column = 1;
 
 char term[MAX_LEXEME_LEN];
 int termLen = 0;
@@ -42,8 +43,7 @@ int parse_file(char *fileName)
         {
             lex();
             cout << nextToken.to_string() << endl;
-            // cout << term << endl;
-        } while (nextToken.lexeme != +Lexeme::TK_EOF && fin->good());
+        } while (fin->good());
     }
     else
     {
@@ -86,20 +86,28 @@ void getChar()
     }
     else
     {
+        // cout << "Chegou no fim do arquivo?" << endl;
         charClass = Lexeme::TK_EOF;
     }
 }
 
 void getNonBlank()
 {
-    while (isspace(nextChar))
+    while (isspace(nextChar) && !fin->fail())
+    {
         getChar();
+    }
 }
 
 Lexeme lookup(char c)
 {
     switch (c)
     {
+    case '!':
+        addChar();
+        nextToken = Token(Lexeme::LOGOP_NOT, line, column - termLen, term);
+        break;
+
         // BINOP
     case '^':
         addChar();
@@ -175,12 +183,26 @@ Lexeme lookup(char c)
         // ASSIGN
     case '=':
         addChar();
+        // TO DO: Verificar se o próximo é =
         nextToken = Token(Lexeme::ASSIGN_VALUE, line, column - termLen, term);
         break;
 
     case ':':
         addChar();
         nextToken = Token(Lexeme::ASSIGN_TYPE, line, column - termLen, term);
+        break;
+
+    // RELOP
+    case '<':
+        addChar();
+        // TO DO: Verificar se o próximo é = (nesse caso é um RELOP_LESS_EQ)
+        nextToken = Token(Lexeme::RELOP_LESS, line, column - termLen, term);
+        break;
+
+    case '>':
+        addChar();
+        // TO DO: Verificar se o próximo é = (nesse caso é um RELOP_GREATER_EQ)
+        nextToken = Token(Lexeme::RELOP_GREATER, line, column - termLen, term);
         break;
 
     default:

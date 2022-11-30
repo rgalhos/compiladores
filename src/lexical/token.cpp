@@ -1,5 +1,6 @@
 #include <string>
 #include <stdint.h>
+#include "reserved_words.cpp"
 #include "lexeme.cpp"
 
 enum ValueType
@@ -14,6 +15,7 @@ enum ValueType
 
 union numeric_val
 {
+    char _char;
     int _int;
     unsigned int _uint;
     double _double;
@@ -29,6 +31,15 @@ public:
     int line;
     int column;
 
+private:
+    void _checkIdentifier()
+    {
+        if (this->lexeme == +Lexeme::IDENTIFIER)
+        {
+            this->lexeme = rw_checkIdentifier(this->value_to_str());
+        }
+    }
+
     void _init(Lexeme lexeme, int line, int column, void *value)
     {
         this->lexeme = lexeme;
@@ -36,8 +47,10 @@ public:
         this->column = column;
         this->tokenType = tokenType;
         this->value = value;
+        this->_checkIdentifier();
     }
 
+public:
     Token(Lexeme lexeme, int line, int column)
     {
         this->tokenType = ValueType::NO_VAL;
@@ -47,30 +60,29 @@ public:
     Token(Lexeme lexeme, int line, int column, int value)
     {
         this->tokenType = ValueType::INT;
-        num_val._int = value;
+        this->num_val._int = value;
         _init(lexeme, line, column, NULL);
     }
 
     Token(Lexeme lexeme, int line, int column, unsigned int value)
     {
         this->tokenType = ValueType::UINT;
-        num_val._uint = value;
+        this->num_val._uint = value;
         _init(lexeme, line, column, NULL);
     }
 
     Token(Lexeme lexeme, int line, int column, double value)
     {
         this->tokenType = ValueType::DOUBLE;
-        num_val._double = value;
+        this->num_val._double = value;
         _init(lexeme, line, column, NULL);
     }
 
     Token(Lexeme lexeme, int line, int column, char value)
     {
         this->tokenType = ValueType::CHAR;
-        char *p = (char *)malloc(sizeof(char));
-        *p = value;
-        _init(lexeme, line, column, (void *)p);
+        this->num_val._char = value;
+        _init(lexeme, line, column, NULL);
     }
 
     Token(Lexeme lexeme, int line, int column, char *value)
@@ -105,10 +117,10 @@ public:
             return std::to_string((this->num_val)._uint);
         case ValueType::DOUBLE:
             return std::to_string((this->num_val)._double);
+        case ValueType::CHAR:
+            return std::string({(this->num_val)._char, '\0'});
         case ValueType::STRING:
             return std::string(*(char **)this->value);
-        case ValueType::CHAR:
-            return std::string({*(char *)this->value, '\0'});
         default:
             return "";
         }

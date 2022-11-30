@@ -1,3 +1,6 @@
+#ifndef LEXEME_CPP
+#define LEXEME_CPP
+
 #include <enum.h>
 
 BETTER_ENUM(Lexeme, int,
@@ -55,6 +58,7 @@ BETTER_ENUM(Lexeme, int,
 
             LOGOP_AND, // &&
             LOGOP_OR,  // ||
+            LOGOP_NOT, // !
 
             DEL_OPEN_PAREN,     // (
             DEL_CLOSE_PAREN,    // )
@@ -68,7 +72,7 @@ BETTER_ENUM(Lexeme, int,
             DEL_APOST,          // '
             DEL_QUOT,           // "
 
-            TK_EOF
+            TK_EOF // EOF
 );
 
 int lexeme_to_int(Lexeme l)
@@ -80,3 +84,5 @@ std::string lexeme_to_str(Lexeme l)
 {
     return l._to_string();
 }
+
+#endif

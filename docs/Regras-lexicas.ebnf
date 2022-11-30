@@ -1,0 +1,71 @@
+letter
+= 'a' | 'b' | 'c' | 'd' | 'e' | 'f' | 'g' | 'h' | 'i' | 'j' | 'k' | 'l' | 'm'
+| 'n' | 'o' | 'p' | 'q' | 'r' | 's' | 't' | 'u' | 'v' | 'w' | 'x' | 'y' | 'z'
+| 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G' | 'H' | 'I' | 'J' | 'K' | 'L' | 'M'
+| 'N' | 'O' | 'P' | 'Q' | 'R' | 'S' | 'T' | 'U' | 'V' | 'W' | 'X' | 'Y' | 'Z'
+;
+
+digit       = '0' | '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' ;
+
+escape      =  '\n' | '\\' | '\'' | \"' ;
+
+symbol
+= '(' | ')' | '[' | ']' | '{' | '}' | '+' | '-' | '/' | '\' | ':' | ';' | '~'
+| '=' | '!' | '?' | '<' | '>' | '.' | ',' | '&' | '#' | '@' | '|' | '_' | '$'
+;
+
+id          =  letter { letter | digit | '_' | '$' } ;
+intconst 	=  digit { digit } ;
+doubleconst =  digit '.' { digit };
+ch          =  letter | digit | escape | symbol ;
+charconst   =  '\'' ch '\'' ;
+stringconst =  '"' { ch } '"' ;
+boolconst   =  'true' | 'false' ;
+
+
+prog           = { decl ';' | func } ;
+decl           = var_decl | const_decl ;
+attr_def       = id ':' type ;
+var_decl       = 'var' attr_def [ '=' assign ] ;
+const_decl     = 'const' attr_def '=' assign ;
+type           = int | uint | double | char | string | void ;
+printv_args    = id | charconst | stringconst | intconst ;
+func           = 'function' id '(' [ attr_def { ',' attr_def } ] ')' ':' type '{' { decl ';' | stmt } '}' ;
+
+stmt
+= 'if' '(' expr ')' stmt [ 'else' stmt ]
+| 'while' '(' expr ')' stmt
+| 'for' '(' [ var_decl ] ';' [ expr ] ';' [ assg ] ')' stmt
+| 'return' [ expr ] ';'
+| 'continue' ';'
+| 'break' ';'
+| 'readv' id { ',' id } ';'
+| 'printv' printv_args { ',' printv_args } ';'
+| assg ';'
+| id '(' [ expr { ',' expr } ] ')' ';'
+| '{' { stmt } '}'
+| ';'
+;
+
+assg           = id [ '[' expr ']' ] '=' expr ;
+
+expr
+= '-' expr
+| '+' expr
+| '!' expr
+| expr binop expr
+| expr relop expr
+| expr logop expr
+| id [ '(' [ expr { ',' expr } ] ')' | '[' expr ']' ]
+| '(' expr ')'
+| intconst
+| doubleconst
+| charconst
+| stringconst
+| boolconst
+;
+
+binop          = '^' | '/' | '*' | '%' | '+' | '-' ;
+relop          = '<' | '<=' | '>' | '>=' | '==' | '!=' ;
+logop          = '&&' | '||' ;
+comment        = '//' { ch } ;

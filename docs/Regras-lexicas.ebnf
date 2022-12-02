@@ -28,7 +28,7 @@ decl           = var_decl | const_decl ;
 attr_def       = id ':' type ;
 var_decl       = 'var' attr_def [ '=' assign ] ;
 const_decl     = 'const' attr_def '=' assign ;
-type           = int | uint | double | char | string | void ;
+type           = int | uint | double | char | string | void | bool;
 printv_args    = id | charconst | stringconst | intconst ;
 func           = 'function' id '(' [ attr_def { ',' attr_def } ] ')' ':' type '{' { decl ';' | stmt } '}' ;
 

@@ -18,6 +18,8 @@ Lexeme rw_checkIdentifier(std::string s)
         return Lexeme::RW_DOUBLE;
     if (!s.compare("char"))
         return Lexeme::RW_CHAR;
+    if (!s.compare("bool"))
+        return Lexeme::RW_BOOL;
     if (!s.compare("string"))
         return Lexeme::RW_STRING;
     if (!s.compare("void"))

@@ -8,6 +8,7 @@ enum ValueType
     INT,
     UINT,
     CHAR,
+    BOOL,
     STRING,
     DOUBLE,
     NO_VAL
@@ -15,6 +16,7 @@ enum ValueType
 
 union numeric_val
 {
+    bool _bool;
     char _char;
     int _int;
     unsigned int _uint;

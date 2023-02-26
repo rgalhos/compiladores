@@ -37,11 +37,12 @@ int parse_file(char *fileName)
     if (fin->is_open())
     {
         getChar();
+
         do
         {
             lex();
             cout << nextToken.to_string() << endl;
-        } while (fin->good()); // (nextToken != EOF);
+        } while (fin->good() && (nextToken.lexeme != +Lexeme::DEL_DOT));
     }
     else
     {
@@ -121,7 +122,6 @@ void readIdentifier()
     putToken(Lexeme::IDENTIFIER, currentTerm);
 }
 
-// TO DO: Tratar apenas
 void readIntegerOrReal()
 {
     bool isDouble = false;
@@ -135,16 +135,12 @@ void readIntegerOrReal()
         getChar();
     }
 
-    if (nextChar == ',')
+    if (nextChar == '.')
     {
         isDouble = true;
 
         addChar();
         getChar();
-
-        // Troca a vírgula por ponto na string para
-        // facilitar a conversão para double na geração do token
-        currentTerm[currentTermLen - 1] = '.';
 
         while (charClass == +CharClass::DIGIT)
         {
@@ -315,7 +311,7 @@ void lookup(char c)
 
 void putToken(Lexeme l)
 {
-    nextToken = Token(l, line, column - currentTermLen);
+    nextToken = Token(l, line, column - currentTermLen, currentTerm);
 }
 
 void putToken(Lexeme l, auto val)

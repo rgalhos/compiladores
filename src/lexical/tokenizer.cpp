@@ -180,6 +180,11 @@ int lex()
         readIntegerOrReal();
         break;
 
+    case CharClass::CHAR_EOF:
+        strcpy(currentTerm, "EOF\0");
+        putToken(Lexeme::TK_EOF);
+        break;
+
     default:
         lookup(nextChar);
         getChar();

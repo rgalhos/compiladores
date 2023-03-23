@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <ctype.h>
+#include <list>
 #include "token.cpp"
 
 #define MAX_LEXEME_LEN 1024
@@ -30,7 +31,7 @@ int currentTermLen = 0;
 
 ifstream *fin;
 
-int parse_file(char *fileName)
+int parse_file(char *fileName, list<Token> *tokenList)
 {
     fin = new ifstream(fileName);
 
@@ -41,7 +42,7 @@ int parse_file(char *fileName)
         do
         {
             lex();
-            cout << nextToken.to_string() << endl;
+            tokenList->push_back(nextToken);
         } while (fin->good() && (nextToken.lexeme != +Lexeme::DEL_DOT));
     }
     else

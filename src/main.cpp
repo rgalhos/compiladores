@@ -1,7 +1,9 @@
 #include <iostream>
 #include <locale.h>
 #include <unistd.h>
+#include <list>
 #include "lexical/tokenizer.cpp"
+#include "syntactic/syntactic.cpp"
 
 int main(int argc, char **argv)
 {
@@ -19,5 +21,10 @@ int main(int argc, char **argv)
         return 2;
     }
 
-    return parse_file(argv[1]);
+    list<Token> tokenList;
+
+    parse_file(argv[1], &tokenList);
+    syntatic_analyser(tokenList);
+
+    return 0;
 }

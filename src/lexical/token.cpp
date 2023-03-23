@@ -1,3 +1,6 @@
+#ifndef TOKEN_CPP
+#define TOKEN_CPP
+
 #include <string>
 #include <stdint.h>
 #include "reserved_words.cpp"
@@ -99,3 +102,5 @@ public:
         return std::string(tmp);
     }
 };
+
+#endif

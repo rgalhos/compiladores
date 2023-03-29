@@ -10,7 +10,7 @@ using namespace std;
 
 int lex();
 void lookup(char);
-void getNonBlank();
+void getAllBlank();
 void getChar();
 void addChar();
 void putToken(Lexeme l);
@@ -56,7 +56,7 @@ int parse_file(char *fileName, list<Token> *tokenList)
     return 0;
 }
 
-void getNonBlank()
+void getAllBlank()
 {
     while (isspace(nextChar) && !fin->fail())
         getChar();
@@ -165,7 +165,7 @@ int lex()
     // Provavelmente é aqui que ocorre o bug de contar as colunas errado
     currentTermLen = 0;
     // Aqui ó -------^
-    getNonBlank();
+    getAllBlank();
 
     switch (charClass)
     {

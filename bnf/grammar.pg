@@ -1,0 +1,192 @@
+programa    : PROGRAM IDENTIFIER SEMICOLON corpo
+            ;
+
+corpo       : declara rotina BEGIN sentencas END
+            ;
+
+declara     : VAR dvar mais_dc
+            | EMPTY
+            ;
+
+mais_dc     : SEMICOLON cont_dc
+            ;
+
+cont_dc     : dvar mais_dc
+            | EMPTY
+            ;
+
+dvar        : variaveis TYPE_ASSIGN tipo_var
+            ;
+
+tipo_var    : KEYWORD
+            | OPEN_BRACKET KEYWORD CLOSE_BRACKET
+            ;
+
+variaveis   : IDENTIFIER mais_var
+            ;
+
+mais_var    : COMMA variaveis
+            | EMPTY
+            ;
+
+rotina      : procedimento
+            | funcao
+            | EMPTY
+            ;
+
+procedimento    : PROCEDURE IDENTIFIER parametros SEMICOLON corpo SEMICOLON rotina
+                ;
+
+funcao      : FUNCTION IDENTIFIER parametros TYPE_ASSIGN tipo_funcao SEMICOLON corpo SEMICOLON rotina
+            ;
+
+parametros  : OPEN_PARENTHESIS lista_parametros CLOSE_PARENTHESIS
+            | EMPTY
+            ;
+
+lista_parametros    : lista_id TYPE_ASSIGN tipo_var cont_lista_par
+                    ;
+
+cont_lista_par  : SEMICOLON lista_parametros
+                | EMPTY
+                ;
+
+lista_id    : IDENTIFIER cont_lista_id
+            ;
+
+cont_lista_id   : COMMA lista_id
+                | EMPTY
+                ;
+
+tipo_funcao     : KEYWORD
+                | OPEN_BRACKET KEYWORD CLOSE_BRACKET
+                ;
+
+sentencas   : comando mais_sentencas
+            ;
+
+mais_sentencas  : COMMA cont_sentencas
+                ;
+
+cont_sentencas  : sentencas
+                | EMPTY
+                ;
+
+var_read    : IDENTIFIER mais_var_read
+            ;
+
+mais_var_read   : COMMA var_read
+                | EMPTY
+                ;
+
+var_write   : IDENTIFIER mais_var_write
+            ;
+
+mais_var_write  : COMMA var_write
+                | EMPTY
+                ;
+
+comando : READ OPEN_PARENTHESIS var_read CLOSE_PARENTHESIS
+        | WRITE OPEN_PARENTHESIS var_write CLOSE_PARENTHESIS
+        | FOR IDENTIFIER VALUE_ASSIGN expressao TO expressao DO BEGIN sentencas END
+        | REPEAT sentencas UNTIL OPEN_PARENTHESIS condicao CLOSE_PARENTHESIS
+        | WHILE OPEN_PARENTHESIS condicao CLOSE_PARENTHESIS DO BEGIN sentencas END
+        | IF OPEN_PARENTHESIS condicao CLOSE_PARENTHESIS THEN BEGIN sentencas END pfalsa
+        | IDENTIFIER VALUE_ASSIGN expressao
+        | chamada_procedimento
+        ;
+
+chamada_procedimento    : IDENTIFIER argumentos
+                        ;
+
+argumentos  : OPEN_PARENTHESIS lista_arg CLOSE_PARENTHESIS
+            | EMPTY
+            ;
+
+lista_arg   : expressao cont_lista_arg
+            ;
+
+cont_lista_arg  : COMMA lista_arg
+                | EMPTY
+                ;
+
+condicao    : RELATION OPEN_PARENTHESIS expressao_num COMMA expressao_num CLOSE_PARENTHESIS
+            | RELATION OPEN_PARENTHESIS expressao_lista COMMA expressao_lista CLOSE_PARENTHESIS
+            ;
+
+pfalsa  : ELSE BEGIN sentencas END
+        | EMPTY
+        ;
+
+expressao   : expressao_num
+            | expressao_lista
+            ;
+
+expressao_num   : termo
+                | IDENTIFIER argumentos
+                ;
+
+operando    : IDENTIFIER
+            | INTEGER
+            | REAL
+            | OPERATOR OPEN_PARENTHESIS operando COMMA operando CLOSE_PARENTHESIS
+            ;
+
+termo   : IDENTIFIER
+        | INTEGER
+        | REAL
+        | OPERATOR OPEN_PARENTHESIS operando COMMA operando CLOSE_PARENTHESIS
+        ;
+
+expressao_lista : OP_LISTA OPEN_PARENTHESIS conteudo CLOSE_PARENTHESIS
+                | CONCATENA OPEN_PARENTHESIS conteudo COMMA conteudo CLOSE_PARENTHESIS
+                ;
+
+conteudo    : OPEN_BRACKET CLOSE_BRACKET
+            | OPEN_BRACKET INTEGER integer_num_cont CLOSE_BRACKET
+            | OPEN_BRACKET REAL real_num_cont CLOSE_BRACKET
+            ;
+
+integer_num_cont    : COMMA INTEGER integer_num_cont
+                    | EMPTY
+                    ;
+
+real_num_cont   : COMMA REAL real_num_cont
+                | EMPTY
+                ;
+
+terminals
+
+KEYWORD : /KEYWORD/;
+IDENTIFIER: /IDENTIFIER/;
+SEMICOLON: /SEMICOLON/;
+COMMA: /COMMA/;
+TYPE_ASSIGN: /TYPE_ASSIGN/;
+BEGIN: /BEGIN/;
+END: /END/;
+VAR: /VAR/;
+PROGRAM: /PROGRAM/;
+PROCEDURE: /PROCEDURE/;
+FUNCTION: /FUNCTION/;
+OPEN_PARENTHESIS: /OPEN_PARENTHESIS/;
+CLOSE_PARENTHESIS: /CLOSE_PARENTHESIS/;
+OPEN_BRACKET: /OPEN_BRACKET/;
+CLOSE_BRACKET: /CLOSE_BRACKET/;
+VALUE_ASSIGN: /VALUE_ASSIGN/;
+OPERATOR: /OPERATOR/;
+OP_LISTA: /OP_LISTA/;
+RELATION: /RELATION/;
+INTEGER: /INTEGER/;
+REAL: /REAL/;
+READ: /READ/;
+WRITE: /WRITE/;
+FOR: /FOR/;
+TO: /TO/;
+REPEAT: /REPEAT/;
+UNTIL: /UNTIL/;
+WHILE: /WHILE/;
+DO: /DO/;
+IF: /IF/;
+ELSE: /ELSE/;
+THEN: /THEN/;
+CONCATENA: /CONCATENA/;

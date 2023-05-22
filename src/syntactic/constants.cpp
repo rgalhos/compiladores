@@ -1,0 +1,9 @@
+#ifndef CONSTANTS_CPP
+#define CONSTANTS_CPP
+
+#define NUM_STATES 211
+#define NUM_PRODUCTIONS 102
+#define NUM_TERMINALS 51
+#define NUM_NON_TERMINALS 47
+
+#endif

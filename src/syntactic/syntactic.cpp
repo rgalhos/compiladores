@@ -1,53 +1,24 @@
 #ifndef SYNTACTIC_CPP
 #define SYNTACTIC_CPP
 
-#define N_STATES 211
-#define N_PRODUCTIONS 102
-#define TERMINAL_SIZE 51
-#define NON_TERMINAL_SIZE 47
-
-#define DEBUG if (1)
-
 #include <iostream>
 #include <vector>
 #include <stack>
 #include <list>
 #include "../lexical/token.cpp"
+#include "./constants.cpp"
+#include "./parse_tables.cpp"
 
 using namespace std;
 
-typedef struct
-{
-    int left;
-    int rightSize;
-} Production;
-
-typedef enum
-{
-    SHIFT,
-    REDUCE,
-    ACCEPT,
-    ERROR,
-} Action;
-
-typedef struct
-{
-    int id;
-    Action action;
-    int i;
-    int j;
-} TableEntry;
-
-void readProductions();
-void readActionTable();
-void readGoToTable();
-int parseTokens();
 void printBadToken(Token t);
+int parseTokens();
 
 vector<Token> tokenList;
+
 vector<Production> productions;
-TableEntry actionTable[N_STATES][TERMINAL_SIZE];
-int goTable[N_STATES][NON_TERMINAL_SIZE];
+ActionTableItem actionTable[NUM_STATES][NUM_TERMINALS];
+int gotoTable[NUM_STATES][NUM_NON_TERMINALS];
 
 int syntatic_analyser(vector<Token> _tokenList)
 {
@@ -63,9 +34,9 @@ int syntatic_analyser(vector<Token> _tokenList)
         }
     }
 
-    readProductions();
-    readActionTable();
-    readGoToTable();
+    readProductions(&productions);
+    readActionTable(actionTable);
+    readGotoTable(gotoTable);
 
     return parseTokens();
 }
@@ -82,37 +53,33 @@ int parseTokens()
     stack<int> pilha;
     pilha.push(0);
 
-    int teste = 0;
-
     while (true)
     {
-        teste++;
         int s = pilha.top();
 
-        TableEntry entry = actionTable[s][currTerminal];
+        ActionTableItem item = actionTable[s][currTerminal];
 
-        if (entry.action == Action::SHIFT)
+        if (item.action == Action::SHIFT)
         {
-            pilha.push(entry.id);
+            pilha.push(item.id);
             currTerminal = lexeme_to_int(inputTokens[++head].lexeme);
         }
-        else if (entry.action == Action::REDUCE)
+        else if (item.action == Action::REDUCE)
         {
-            for (int i = 0; i < productions[entry.id - 1].rightSize; i++)
+            for (int i = 0; i < productions[item.id - 1].rightSize; i++)
                 pilha.pop();
 
             s = pilha.top();
-            pilha.push(goTable[s][productions[entry.id - 1].left]);
+            pilha.push(gotoTable[s][productions[item.id - 1].left]);
         }
-        else if (entry.action == Action::ACCEPT)
+        else if (item.action == Action::ACCEPT)
         {
-            cout << "AEEEEEEEEEEEEEHOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO" << endl;
-            return 1;
+            cout << "Nenhum erro sintático encontrado" << endl;
+            return 0;
         }
         else
         {
-            cout << teste << endl;
-            cout << entry.action << " " << entry.id << "[" << entry.i << ", " << entry.j << "]" << endl;
+            cout << item.action << " " << item.id << "[" << item.i << ", " << item.j << "]" << endl;
             puts("> Syntax error at token:");
 
             for (int window = -5; window <= 7; window++)
@@ -128,9 +95,9 @@ int parseTokens()
             }
 
             int expectedSize = 0;
-            int expected[TERMINAL_SIZE];
+            int expected[NUM_TERMINALS];
 
-            for (int k = 0; k < TERMINAL_SIZE; k++)
+            for (int k = 0; k < NUM_TERMINALS; k++)
             {
                 if (actionTable[s][k].action != Action::ERROR)
                 {
@@ -154,9 +121,10 @@ int parseTokens()
                         printf(", ");
                 }
                 printf(" ]\n");
-                return 0;
+                return 1;
             }
-            return 0;
+
+            return 1;
         }
     }
 }
@@ -165,72 +133,6 @@ void printBadToken(Token t)
 {
     cerr << "              \u001b[31m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\033[0m" << endl;
     cerr << "              \u001b[31mErro:\033[0m Token inválido" << endl;
-}
-
-void readProductions()
-{
-    ifstream fin("bnf/productions.txt");
-    int left, rightSize;
-
-    while (fin.good())
-    {
-        fin >> left >> rightSize;
-
-        if (fin.eof())
-            break;
-
-        productions.push_back(Production{
-            .left = left,
-            .rightSize = rightSize,
-        });
-    }
-
-    fin.close();
-}
-
-void readActionTable()
-{
-    ifstream fin("bnf/action_table.txt");
-    char line[32];
-
-    for (int i = 0; i < N_STATES; i++)
-    {
-        for (int j = 0; j < TERMINAL_SIZE; j++)
-        {
-            fin.getline(line, 32);
-
-            if (fin.eof())
-                break;
-
-            char *t = strtok(line, " ");
-            actionTable[i][j].action = (Action)atoi(t);
-
-            t = strtok(NULL, " ");
-            actionTable[i][j].id = atoi(t);
-
-            actionTable[i][j].i = i;
-            actionTable[i][j].j = j;
-        }
-    }
-}
-
-void readGoToTable()
-{
-    ifstream fin("bnf/goto_table.txt");
-    int state;
-
-    for (int i = 0; i < N_STATES; i++)
-    {
-        for (int j = 0; j < NON_TERMINAL_SIZE; j++)
-        {
-            fin >> state;
-
-            if (fin.eof())
-                break;
-
-            goTable[i][j] = state;
-        }
-    }
 }
 
 #endif

@@ -1,7 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <ctype.h>
-#include <list>
+#include <vector>
 #include "token.cpp"
 
 #define MAX_LEXEME_LEN 1024
@@ -31,7 +31,7 @@ int currentTermLen = 0;
 
 ifstream *fin;
 
-int parse_file(char *fileName, list<Token> *tokenList)
+int parse_file(char *fileName, vector<Token> *tokenList)
 {
     fin = new ifstream(fileName);
 

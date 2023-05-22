@@ -4,7 +4,7 @@
 #include <enum.h>
 
 BETTER_ENUM(CharClass, int,
-            UNKNOWN = 1,
+            UNKNOWN,
 
             LETTER,
             DIGIT,
@@ -15,7 +15,7 @@ BETTER_ENUM(CharClass, int,
 );
 
 BETTER_ENUM(Lexeme, int,
-            UNKNOWN = 1,
+            UNKNOWN,
 
             IDENTIFIER,
             CONST_INTEGER,
@@ -71,10 +71,13 @@ BETTER_ENUM(Lexeme, int,
             DEL_COMMA,          // ,
             DEL_DOT,            // •
 
-            TK_EOF // EOF
+            TK_EOF, // EOF
+
+            EMPTY,  // SPECIAL: EMPTY
+            STOP    // SPECIAL: STOP
 );
 
-int lexeme_to_int(Lexeme l)
+inline int lexeme_to_int(Lexeme l)
 {
     return (+l);
 }

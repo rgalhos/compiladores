@@ -1,14 +1,28 @@
-programa    : PROGRAM IDENTIFIER SEMICOLON corpo
+programa    : RW_PROGRAM IDENTIFIER DEL_SEMICOLON corpo final
             ;
 
-corpo       : declara rotina BEGIN sentencas END
-            ;
-
-declara     : VAR dvar mais_dc
+final       : corpo
+            | DEL_DOT eof_se_existir
+            | TK_EOF
             | EMPTY
             ;
 
-mais_dc     : SEMICOLON cont_dc
+eof_se_existir  : TK_EOF
+                | EMPTY
+                ;
+
+corpo       : declara rotina RW_BEGIN corpo_sentencas RW_END
+            ;
+
+corpo_sentencas : sentencas
+                | EMPTY
+                ;
+
+declara     : RW_VAR dvar mais_dc
+            | EMPTY
+            ;
+
+mais_dc     : DEL_SEMICOLON cont_dc
             ;
 
 cont_dc     : dvar mais_dc
@@ -18,14 +32,18 @@ cont_dc     : dvar mais_dc
 dvar        : variaveis TYPE_ASSIGN tipo_var
             ;
 
-tipo_var    : KEYWORD
-            | OPEN_BRACKET KEYWORD CLOSE_BRACKET
+tipo_var    : primitivos
+            | DEL_OPEN_BRACKETS primitivos DEL_CLOSE_BRACKETS
+            ;
+
+primitivos  : RW_INTEGER
+            | RW_REAL
             ;
 
 variaveis   : IDENTIFIER mais_var
             ;
 
-mais_var    : COMMA variaveis
+mais_var    : DEL_COMMA variaveis
             | EMPTY
             ;
 
@@ -34,38 +52,39 @@ rotina      : procedimento
             | EMPTY
             ;
 
-procedimento    : PROCEDURE IDENTIFIER parametros SEMICOLON corpo SEMICOLON rotina
+procedimento    : RW_PROCEDURE IDENTIFIER parametros DEL_SEMICOLON corpo rotina
                 ;
 
-funcao      : FUNCTION IDENTIFIER parametros TYPE_ASSIGN tipo_funcao SEMICOLON corpo SEMICOLON rotina
+funcao      : RW_FUNCTION IDENTIFIER parametros TYPE_ASSIGN tipo_funcao DEL_SEMICOLON corpo rotina
             ;
 
-parametros  : OPEN_PARENTHESIS lista_parametros CLOSE_PARENTHESIS
+parametros  : DEL_OPEN_PAREN lista_parametros DEL_CLOSE_PAREN
             | EMPTY
             ;
 
 lista_parametros    : lista_id TYPE_ASSIGN tipo_var cont_lista_par
                     ;
 
-cont_lista_par  : SEMICOLON lista_parametros
+cont_lista_par  : DEL_COMMA lista_parametros
                 | EMPTY
                 ;
 
 lista_id    : IDENTIFIER cont_lista_id
             ;
 
-cont_lista_id   : COMMA lista_id
+cont_lista_id   : DEL_COMMA lista_id
                 | EMPTY
                 ;
 
-tipo_funcao     : KEYWORD
-                | OPEN_BRACKET KEYWORD CLOSE_BRACKET
+tipo_funcao     : primitivos
+                | DEL_OPEN_BRACKETS primitivos DEL_CLOSE_BRACKETS
                 ;
 
 sentencas   : comando mais_sentencas
             ;
 
-mais_sentencas  : COMMA cont_sentencas
+mais_sentencas  : DEL_SEMICOLON cont_sentencas
+                | EMPTY
                 ;
 
 cont_sentencas  : sentencas
@@ -75,23 +94,23 @@ cont_sentencas  : sentencas
 var_read    : IDENTIFIER mais_var_read
             ;
 
-mais_var_read   : COMMA var_read
+mais_var_read   : DEL_COMMA var_read
                 | EMPTY
                 ;
 
 var_write   : IDENTIFIER mais_var_write
             ;
 
-mais_var_write  : COMMA var_write
+mais_var_write  : DEL_COMMA var_write
                 | EMPTY
                 ;
 
-comando : READ OPEN_PARENTHESIS var_read CLOSE_PARENTHESIS
-        | WRITE OPEN_PARENTHESIS var_write CLOSE_PARENTHESIS
-        | FOR IDENTIFIER VALUE_ASSIGN expressao TO expressao DO BEGIN sentencas END
-        | REPEAT sentencas UNTIL OPEN_PARENTHESIS condicao CLOSE_PARENTHESIS
-        | WHILE OPEN_PARENTHESIS condicao CLOSE_PARENTHESIS DO BEGIN sentencas END
-        | IF OPEN_PARENTHESIS condicao CLOSE_PARENTHESIS THEN BEGIN sentencas END pfalsa
+comando : RW_READ DEL_OPEN_PAREN var_read DEL_CLOSE_PAREN
+        | RW_WRITE DEL_OPEN_PAREN var_write DEL_CLOSE_PAREN
+        | RW_FOR IDENTIFIER VALUE_ASSIGN expressao RW_TO expressao RW_DO RW_BEGIN sentencas RW_END
+        | RW_REPEAT sentencas RW_UNTIL DEL_OPEN_PAREN condicao DEL_CLOSE_PAREN
+        | RW_WHILE DEL_OPEN_PAREN condicao DEL_CLOSE_PAREN RW_DO RW_BEGIN sentencas RW_END
+        | RW_IF DEL_OPEN_PAREN condicao DEL_CLOSE_PAREN RW_THEN RW_BEGIN sentencas RW_END pfalsa
         | IDENTIFIER VALUE_ASSIGN expressao
         | chamada_procedimento
         ;
@@ -99,22 +118,30 @@ comando : READ OPEN_PARENTHESIS var_read CLOSE_PARENTHESIS
 chamada_procedimento    : IDENTIFIER argumentos
                         ;
 
-argumentos  : OPEN_PARENTHESIS lista_arg CLOSE_PARENTHESIS
+argumentos  : DEL_OPEN_PAREN lista_arg DEL_CLOSE_PAREN
             | EMPTY
             ;
 
 lista_arg   : expressao cont_lista_arg
             ;
 
-cont_lista_arg  : COMMA lista_arg
+cont_lista_arg  : DEL_COMMA lista_arg
                 | EMPTY
                 ;
 
-condicao    : RELATION OPEN_PARENTHESIS expressao_num COMMA expressao_num CLOSE_PARENTHESIS
-            | RELATION OPEN_PARENTHESIS expressao_lista COMMA expressao_lista CLOSE_PARENTHESIS
+condicao    : relop DEL_OPEN_PAREN expressao_num DEL_COMMA expressao_num DEL_CLOSE_PAREN
+            | relop DEL_OPEN_PAREN expressao_lista DEL_COMMA expressao_lista DEL_CLOSE_PAREN
             ;
 
-pfalsa  : ELSE BEGIN sentencas END
+relop   : RELOP_EQUAL
+        | RELOP_LESS_THAN
+        | RELOP_GREATER_THAN
+        | RELOP_LESS_OR_EQ_THAN
+        | RELOP_GREATER_OR_EQ_THAN
+        | RELOP_NOT_EQUAL
+        ;
+
+pfalsa  : RW_ELSE RW_BEGIN sentencas RW_END
         | EMPTY
         ;
 
@@ -127,66 +154,104 @@ expressao_num   : termo
                 ;
 
 operando    : IDENTIFIER
-            | INTEGER
-            | REAL
-            | OPERATOR OPEN_PARENTHESIS operando COMMA operando CLOSE_PARENTHESIS
+            | CONST_INTEGER
+            | CONST_REAL
+            | operator DEL_OPEN_PAREN operando DEL_COMMA operando DEL_CLOSE_PAREN
             ;
 
 termo   : IDENTIFIER
-        | INTEGER
-        | REAL
-        | OPERATOR OPEN_PARENTHESIS operando COMMA operando CLOSE_PARENTHESIS
+        | CONST_INTEGER
+        | CONST_REAL
+        | operator DEL_OPEN_PAREN operando DEL_COMMA operando DEL_CLOSE_PAREN
         ;
 
-expressao_lista : OP_LISTA OPEN_PARENTHESIS conteudo CLOSE_PARENTHESIS
-                | CONCATENA OPEN_PARENTHESIS conteudo COMMA conteudo CLOSE_PARENTHESIS
+operator        : OP_SUM
+                | OP_SUB
+                | OP_MUL
+                | OP_DIV
+                | OP_DIV_INT
                 ;
 
-conteudo    : OPEN_BRACKET CLOSE_BRACKET
-            | OPEN_BRACKET INTEGER integer_num_cont CLOSE_BRACKET
-            | OPEN_BRACKET REAL real_num_cont CLOSE_BRACKET
+expressao_lista : op_lista DEL_OPEN_PAREN conteudo DEL_CLOSE_PAREN
+                | RW_CONCATENA DEL_OPEN_PAREN conteudo DEL_COMMA conteudo DEL_CLOSE_PAREN
+                ;
+
+op_lista        : RW_LENGTH
+                | RW_HEAD
+                | RW_TAIL
+                ;
+
+conteudo    : DEL_OPEN_BRACKETS DEL_CLOSE_BRACKETS
+            | DEL_OPEN_BRACKETS CONST_INTEGER integer_num_cont DEL_CLOSE_BRACKETS
+            | DEL_OPEN_BRACKETS CONST_REAL real_num_cont DEL_CLOSE_BRACKETS
             ;
 
-integer_num_cont    : COMMA INTEGER integer_num_cont
+integer_num_cont    : DEL_COMMA CONST_INTEGER integer_num_cont
                     | EMPTY
                     ;
 
-real_num_cont   : COMMA REAL real_num_cont
+real_num_cont   : DEL_COMMA CONST_REAL real_num_cont
                 | EMPTY
                 ;
 
 terminals
 
-KEYWORD : /KEYWORD/;
+
+UNKNOWN: /UNKNOWN/;
+
 IDENTIFIER: /IDENTIFIER/;
-SEMICOLON: /SEMICOLON/;
-COMMA: /COMMA/;
-TYPE_ASSIGN: /TYPE_ASSIGN/;
-BEGIN: /BEGIN/;
-END: /END/;
-VAR: /VAR/;
-PROGRAM: /PROGRAM/;
-PROCEDURE: /PROCEDURE/;
-FUNCTION: /FUNCTION/;
-OPEN_PARENTHESIS: /OPEN_PARENTHESIS/;
-CLOSE_PARENTHESIS: /CLOSE_PARENTHESIS/;
-OPEN_BRACKET: /OPEN_BRACKET/;
-CLOSE_BRACKET: /CLOSE_BRACKET/;
+CONST_INTEGER: /CONST_INTEGER/;
+CONST_REAL: /CONST_REAL/;
+CONST_LISTA: /CONST_LISTA/;
+
+OP_SUM: /OP_SUM/;
+OP_SUB: /OP_SUB/;
+OP_MUL: /OP_MUL/;
+OP_DIV: /OP_DIV/;
+OP_DIV_INT: /OP_DIV_INT/;
+
+RELOP_EQUAL: /RELOP_EQUAL/;
+RELOP_LESS_THAN: /RELOP_LESS_THAN/;
+RELOP_GREATER_THAN: /RELOP_GREATER_THAN/;
+RELOP_LESS_OR_EQ_THAN: /RELOP_LESS_OR_EQ_THAN/;
+RELOP_GREATER_OR_EQ_THAN: /RELOP_GREATER_OR_EQ_THAN/;
+RELOP_NOT_EQUAL: /RELOP_NOT_EQUAL/;
+
+RW_PROGRAM: /RW_PROGRAM/;
+RW_PROCEDURE: /RW_PROCEDURE/;
+RW_BEGIN: /RW_BEGIN/;
+RW_END: /RW_END/;
+RW_FUNCTION: /RW_FUNCTION/;
+RW_READ: /RW_READ/;
+RW_WRITE: /RW_WRITE/;
+RW_FOR: /RW_FOR/;
+RW_TO: /RW_TO/;
+RW_DO: /RW_DO/;
+RW_REPEAT: /RW_REPEAT/;
+RW_UNTIL: /RW_UNTIL/;
+RW_WHILE: /RW_WHILE/;
+RW_IF: /RW_IF/;
+RW_ELSE: /RW_ELSE/;
+RW_THEN: /RW_THEN/;
+RW_VAR: /RW_VAR/;
+RW_INTEGER: /RW_INTEGER/;
+RW_REAL: /RW_REAL/;
+RW_CONCATENA: /RW_CONCATENA/;
+
+
+RW_LENGTH: /RW_LENGTH/;
+RW_HEAD: /RW_HEAD/;
+RW_TAIL: /RW_TAIL/;
+
 VALUE_ASSIGN: /VALUE_ASSIGN/;
-OPERATOR: /OPERATOR/;
-OP_LISTA: /OP_LISTA/;
-RELATION: /RELATION/;
-INTEGER: /INTEGER/;
-REAL: /REAL/;
-READ: /READ/;
-WRITE: /WRITE/;
-FOR: /FOR/;
-TO: /TO/;
-REPEAT: /REPEAT/;
-UNTIL: /UNTIL/;
-WHILE: /WHILE/;
-DO: /DO/;
-IF: /IF/;
-ELSE: /ELSE/;
-THEN: /THEN/;
-CONCATENA: /CONCATENA/;
+TYPE_ASSIGN: /TYPE_ASSIGN/;
+
+DEL_OPEN_PAREN: /DEL_OPEN_PAREN/;
+DEL_CLOSE_PAREN: /DEL_CLOSE_PAREN/;
+DEL_OPEN_BRACKETS: /DEL_OPEN_BRACKETS/;
+DEL_CLOSE_BRACKETS: /DEL_CLOSE_BRACKETS/;
+DEL_SEMICOLON: /DEL_SEMICOLON/;
+DEL_COMMA: /DEL_COMMA/;
+DEL_DOT: /DEL_DOT/;
+
+TK_EOF: /TK_EOF/;

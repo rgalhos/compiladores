@@ -1,0 +1,6 @@
+program myProgram;
+
+begin
+
+end
+

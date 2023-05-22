@@ -9,6 +9,15 @@ int main(int argc, char **argv)
 {
     setlocale(LC_ALL, "Portuguese");
 
+    /*
+    for (int i = 0; i < 51; i++)
+    {
+        cout << i << " " << lexeme_to_str(Lexeme::_from_index(i)).c_str() << endl;
+    }
+
+    return 0;
+    */
+
     if (argc == 1)
     {
         std::cout << "Utilização: " << argv[0] << " [file]" << std::endl;
@@ -21,7 +30,7 @@ int main(int argc, char **argv)
         return 2;
     }
 
-    list<Token> tokenList;
+    vector<Token> tokenList;
 
     parse_file(argv[1], &tokenList);
     syntatic_analyser(tokenList);

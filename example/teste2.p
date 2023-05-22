@@ -1,13 +1,12 @@
 program testeLista;
 
-var lista: [integer];
+var lista: [integer]; tamanho: integer;
 
 begin
 
     lista := concatena([], [1, 2, 3, 4, 5]);
 
-    var tamanho: integer;
-    tamanho := length(lista)
+    tamanho := length([1, 2, 3])
 
 end
 

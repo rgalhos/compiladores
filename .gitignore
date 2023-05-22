@@ -1,3 +1,8 @@
 /.vscode
 /rppp
 /*.p
+
+/bnf/action_table.txt
+/bnf/goto_table.txt
+/bnf/output.c
+/bnf/productions.txt

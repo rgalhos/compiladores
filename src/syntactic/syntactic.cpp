@@ -34,6 +34,9 @@ int syntatic_analyser(vector<Token> _tokenList)
         }
     }
 
+    cout << endl
+         << endl;
+
     readProductions(&productions);
     readActionTable(actionTable);
     readGotoTable(gotoTable);
@@ -79,52 +82,69 @@ int parseTokens()
         }
         else
         {
-            cout << item.action << " " << item.id << "[" << item.i << ", " << item.j << "]" << endl;
-            puts("> Syntax error at token:");
+            Token currToken = inputTokens[head];
 
-            for (int window = -5; window <= 7; window++)
+            cout << "Erro sintático encontrado na linha " << currToken.line << ", coluna " << currToken.column << "!" << endl;
+            //cout << currToken.to_string() << endl;
+
+            int charCount = 0, errStart = 0, errSize = 0;
+            for (int i = -4; i < 4; i++)
             {
-                if (head + window >= 0 && head + window < (int)tokenList.size())
+                if (head + i < 0 || head + i > (int)inputTokens.size())
+                    continue;
+
+                string t = lexeme_to_str(inputTokens[head + i].lexeme);
+
+                if (i == 0)
                 {
-                    if (window == 0)
-                        printf(" >>>>");
-                    else
-                        printf(" ");
-                    printf("%s", lexeme_to_str(inputTokens[head + window].lexeme).c_str());
+                    cout << " \u001b[31m" << t << "\033[0m";
+                    errStart = charCount;
+                    errSize = t.size();
+                }
+                else
+                {
+                    cout << " " << t;
+                }
+
+                charCount += t.size() + 1;
+            }
+
+            cout << endl;
+            for (int i = 0; i < charCount; i++)
+            {
+                if (i > errStart && i < errStart + errSize + 1)
+                    cout << "\u001b[31m^\033[0m";
+                else
+                    cout << "~";
+            }
+            cout << endl;
+
+            vector<int> expectedTokens;
+
+            for (int i = 0; i < NUM_TERMINALS; i++)
+            {
+                if (actionTable[s][i].action != Action::ERROR)
+                {
+                    expectedTokens.push_back(i);
                 }
             }
 
-            int expectedSize = 0;
-            int expected[NUM_TERMINALS];
-
-            for (int k = 0; k < NUM_TERMINALS; k++)
+            if (expectedTokens.size() == 1)
             {
-                if (actionTable[s][k].action != Action::ERROR)
+                cout << "Token esperado: \"" << lexeme_to_str(Lexeme::_from_index(expectedTokens[0])).c_str() << "\"" << endl;
+                return 0;
+            }
+            else
+            {
+                cout << "Um dos seguintes tokens era esperado: ";
+                for (int t : expectedTokens)
                 {
-                    expected[expectedSize++] = Lexeme::_from_index(k);
+                    cout << lexeme_to_str(Lexeme::_from_index(t)).c_str() << " ";
                 }
-            }
+                cout << endl;
 
-            if (expectedSize == 1)
-            {
-                printf("... [ Expected a %s token ]\n", lexeme_to_str(Lexeme::_from_index(expected[0])).c_str());
-                currTerminal = expected[0];
-                puts("> Ignoring error and continuing analysis.");
+                return 0;
             }
-            else if (expectedSize > 1)
-            {
-                printf("... [ Ambiguous statement. Expected one of the following tokens: ");
-                for (int k = 0; k < expectedSize; k++)
-                {
-                    printf("%s", lexeme_to_str(Lexeme::_from_index(expected[k])).c_str());
-                    if (k < expectedSize - 1)
-                        printf(", ");
-                }
-                printf(" ]\n");
-                return 1;
-            }
-
-            return 1;
         }
     }
 }
